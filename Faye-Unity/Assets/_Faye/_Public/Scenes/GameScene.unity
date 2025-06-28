@@ -404,8 +404,8 @@ Transform:
   m_GameObject: {fileID: 957251229}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: -0.7071068, w: 0}
-  m_LocalPosition: {x: 0, y: 3.44, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -0.48, y: 0.14, z: 0}
+  m_LocalScale: {x: 1.32, y: 1.34, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1432199785}
@@ -477,6 +477,7 @@ GameObject:
   - component: {fileID: 1432199784}
   - component: {fileID: 1432199783}
   - component: {fileID: 1432199786}
+  - component: {fileID: 1432199787}
   m_Layer: 6
   m_Name: GoalArea
   m_TagString: Untagged
@@ -546,8 +547,8 @@ Transform:
   m_GameObject: {fileID: 1432199781}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.13, z: 4.668}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.20000003}
+  m_LocalPosition: {x: 0, y: 0.37, z: 4.61}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 957251230}
@@ -574,6 +575,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 2.220446e-16, z: 10}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1432199787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1432199781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c92f68c30de3fd34b9f86a3128554065, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseRenderer: {fileID: 1432199783}
+  childSpriteRenderer: {fileID: 957251231}
+  defaultColor: {r: 1, g: 1, b: 1, a: 0}
 --- !u!33 &466692258762746254
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1278,8 +1294,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   playerTransform: {fileID: 880264395839635218}
-  goalCollider: {fileID: 1432199786}
   pointSpacing: 0.01
+  startDistanceThreshold: 0.3
 --- !u!114 &9146957117529844393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1292,6 +1308,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be6c608dd2feb5f4fb3a73f305d623d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  goalColorChanger: {fileID: 1432199787}
+  playerColor: {r: 1, g: 0, b: 0, a: 1}
   speed: 3
 --- !u!114 &9146957117529844394
 MonoBehaviour:

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 
 public class CarMover : MonoBehaviour
 {
-    public float speed = 3f;
+    public GoalColorChange goalColorChanger;
+    public Color           playerColor = Color.red;
+    public float           speed = 3f;
 
-    private List<Vector3> path;
-    private int           currentIndex = 0;
-    private bool          isMoving = false;
+    private List<Vector3>  path;
+    private int            currentIndex = 0;
+    private bool           isMoving = false;
 
     public void SetPath(List<Vector3> newPath)
     {
@@ -30,10 +32,17 @@ public class CarMover : MonoBehaviour
         if (Vector3.Distance(transform.position, target) < 0.1f)
         {
             currentIndex++;
+
             if (currentIndex >= path.Count)
             {
                 isMoving = false;
                 Debug.Log("ゴールに到達！クリア！");
+
+                if (goalColorChanger != null)
+                {
+                    goalColorChanger.ChangeColor(playerColor);
+                    Debug.Log("色変わり");
+                }
             }
         }
     }
