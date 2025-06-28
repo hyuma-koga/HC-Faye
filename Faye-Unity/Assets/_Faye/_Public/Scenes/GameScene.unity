@@ -480,7 +480,7 @@ GameObject:
   - component: {fileID: 1432199787}
   m_Layer: 6
   m_Name: GoalArea
-  m_TagString: Untagged
+  m_TagString: Goal
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1294,6 +1294,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   playerTransform: {fileID: 880264395839635218}
+  goalCollider: {fileID: 1432199786}
   pointSpacing: 0.01
   startDistanceThreshold: 0.3
 --- !u!114 &9146957117529844393

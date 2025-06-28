@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem.LowLevel;
 
 [RequireComponent(typeof(LineRenderer))]
 public class PathDrawer : MonoBehaviour
 {
     public LayerMask      groundMask;
     public Transform      playerTransform;
+    public Collider       goalCollider;
     public float          pointSpacing = 0.01f;
     public float          startDistanceThreshold = 0.3f;
 
@@ -15,6 +17,7 @@ public class PathDrawer : MonoBehaviour
     private Quaternion    initialPlayerRotation;
     private bool          isDrawing = false;
     private bool          finished = false;
+    private bool          isPathDrawingEnabled = true;
 
     private void Awake()
     {
@@ -25,11 +28,15 @@ public class PathDrawer : MonoBehaviour
 
     public void DrawPath()
     {
+        if (!isPathDrawingEnabled)
+        {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             if (!TryGetMouseHitPoint(out Vector3 startPoint))
             {
-                // 地面にヒットしていなければ何もしない
                 isDrawing = false;
                 finished = false;
                 return;
@@ -76,6 +83,21 @@ public class PathDrawer : MonoBehaviour
                     pathPoints.Add(point);
                     lineRenderer.positionCount = pathPoints.Count;
                     lineRenderer.SetPositions(pathPoints.ToArray());
+
+                    Vector2 pointXZ = new Vector2(point.x, point.z);
+                    Vector2 goalXZ = new Vector2(goalCollider.bounds.center.x, goalCollider.bounds.center.z);
+
+                    float distanceToGoal = Vector2.Distance(pointXZ, goalXZ);
+
+                    // ゴールのXZ方向の半径（BoxCollider想定）
+                    float stopThreshold = Mathf.Min(goalCollider.bounds.extents.x, goalCollider.bounds.extents.z) * 0.3f;
+
+                    if (distanceToGoal < stopThreshold)
+                    {
+                        Debug.Log("ゴールエリア内に少し入ったタイミングで停止！");
+                        DisablePathDrawing();
+                        return;
+                    }
                 }
             }
         }
@@ -124,5 +146,12 @@ public class PathDrawer : MonoBehaviour
     public void ResetPathState()
     {
         finished = false;
+    }
+
+    public void DisablePathDrawing()
+    {
+        isPathDrawingEnabled = false;
+        isDrawing = false;
+        finished = true;
     }
 }

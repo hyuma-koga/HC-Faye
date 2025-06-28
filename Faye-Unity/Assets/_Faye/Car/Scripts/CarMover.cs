@@ -10,12 +10,16 @@ public class CarMover : MonoBehaviour
     private List<Vector3>  path;
     private int            currentIndex = 0;
     private bool           isMoving = false;
+    private bool           reachedGoalArea = false;
+    private bool           hasCleared = false;
 
     public void SetPath(List<Vector3> newPath)
     {
         path = new List<Vector3>(newPath);
         currentIndex = 0;
         isMoving = true;
+        hasCleared = false;
+        reachedGoalArea = false;
     }
 
     public void MoveAlongPath()
@@ -36,14 +40,25 @@ public class CarMover : MonoBehaviour
             if (currentIndex >= path.Count)
             {
                 isMoving = false;
-                Debug.Log("ゴールに到達！クリア！");
-
-                if (goalColorChanger != null)
-                {
-                    goalColorChanger.ChangeColor(playerColor);
-                    Debug.Log("色変わり");
-                }
             }
+        }
+
+        if (!isMoving && reachedGoalArea && !hasCleared)
+        {
+            if (goalColorChanger != null)
+            {
+                goalColorChanger.ChangeColor(playerColor);
+            }
+
+            hasCleared = true;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Goal"))
+        {
+            reachedGoalArea = true;
         }
     }
 }
