@@ -6,9 +6,9 @@ public class GameScreenUI : MonoBehaviour
 {
     public GameObject uiRoot; // UI全体まとめた親オブジェクト
     public TMP_Text   scoreText;
-    public Image[] keyIcons;
-    public Color keyActiveColor = Color.yellow;
-    public Color keyDefaultColor = Color.white;
+    public Image[]    keyIcons;
+    public Color      keyActiveColor = Color.yellow;
+    public Color      keyDefaultColor = Color.white;
 
     private void Start()
     {

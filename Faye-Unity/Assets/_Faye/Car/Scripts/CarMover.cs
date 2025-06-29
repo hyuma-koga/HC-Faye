@@ -54,6 +54,11 @@ public class CarMover : MonoBehaviour
         }
     }
 
+    public void StopMoving()
+    {
+        isMoving = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Goal"))
