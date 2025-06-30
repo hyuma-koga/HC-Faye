@@ -4,14 +4,27 @@ using System.Collections.Generic;
 public class CarMover : MonoBehaviour
 {
     public GoalColorChange goalColorChanger;
-    public Color           playerColor = Color.red;
-    public float           speed = 3f;
+    public Color playerColor = Color.red;
+    public float speed = 3f;
 
-    private List<Vector3>  path;
-    private int            currentIndex = 0;
-    private bool           isMoving = false;
-    private bool           reachedGoalArea = false;
-    private bool           hasCleared = false;
+    private GameClearUIHandler clearUIHandler; // Prefab外のオブジェクトを後でFindする
+
+    private List<Vector3> path;
+    private int currentIndex = 0;
+    private bool isMoving = false;
+    private bool hasCleared = false;
+    private bool reachedGoalArea = false; // ← ゴールに入ったかフラグ
+
+    private void Awake()
+    {
+        // GameClearUIHandler をシーン内から探して取得
+        clearUIHandler = FindFirstObjectByType<GameClearUIHandler>();
+
+        if (clearUIHandler != null)
+        {
+            clearUIHandler.HideUIImmediately();
+        }
+    }
 
     public void SetPath(List<Vector3> newPath)
     {
@@ -20,6 +33,16 @@ public class CarMover : MonoBehaviour
         isMoving = true;
         hasCleared = false;
         reachedGoalArea = false;
+
+        if (path.Count > 0)
+        {
+            transform.position = path[0];
+        }
+
+        if (clearUIHandler != null)
+        {
+            clearUIHandler.HideUIImmediately();
+        }
     }
 
     public void MoveAlongPath()
@@ -43,11 +66,17 @@ public class CarMover : MonoBehaviour
             }
         }
 
+        // 「停止していて」「ゴールに入っていて」「まだ処理していない」場合に処理
         if (!isMoving && reachedGoalArea && !hasCleared)
         {
             if (goalColorChanger != null)
             {
                 goalColorChanger.ChangeColor(playerColor);
+            }
+
+            if (clearUIHandler != null)
+            {
+                clearUIHandler.StartClearSequence();
             }
 
             hasCleared = true;
@@ -63,7 +92,7 @@ public class CarMover : MonoBehaviour
     {
         if (other.CompareTag("Goal"))
         {
-            reachedGoalArea = true;
+            reachedGoalArea = true; // フラグを立てるだけ
         }
     }
 }
