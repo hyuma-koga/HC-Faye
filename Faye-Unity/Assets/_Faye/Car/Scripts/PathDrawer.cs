@@ -1,6 +1,5 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.InputSystem.LowLevel;
 
 [RequireComponent(typeof(LineRenderer))]
 public class PathDrawer : MonoBehaviour
@@ -8,11 +7,13 @@ public class PathDrawer : MonoBehaviour
     public LayerMask      groundMask;
     public Transform      playerTransform;
     public Collider       goalCollider;
-    public float          pointSpacing = 0.01f;
+    public float          pointSpacing = 0.05f;
     public float          startDistanceThreshold = 0.3f;
 
     private LineRenderer  lineRenderer;
     private List<Vector3> pathPoints = new List<Vector3>();
+    private List<Vector3> smoothedPoints = new List<Vector3>();
+
     private Vector3       initialPlayerPosition;
     private Quaternion    initialPlayerRotation;
     private bool          isDrawing = false;
@@ -28,48 +29,17 @@ public class PathDrawer : MonoBehaviour
 
     public void DrawPath()
     {
-        if (!isPathDrawingEnabled)
-        {
-            return;
-        }
+        if (!isPathDrawingEnabled) return;
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (!TryGetMouseHitPoint(out Vector3 startPoint))
-            {
-                isDrawing = false;
-                finished = false;
-                return;
-            }
-
-            Vector2 startXZ = new Vector2(startPoint.x, startPoint.z);
-            Vector2 currentXZ = new Vector2(playerTransform.position.x, playerTransform.position.z);
-            Vector2 initialXZ = new Vector2(initialPlayerPosition.x, initialPlayerPosition.z);
-
-            bool fromPlayer = Vector2.Distance(startXZ, currentXZ) < startDistanceThreshold;
-            bool fromInitial = Vector2.Distance(startXZ, initialXZ) < startDistanceThreshold;
-
-            if (fromInitial)
-            {
-                playerTransform.position = initialPlayerPosition;
-                playerTransform.rotation = initialPlayerRotation;
-                pathPoints.Clear();
-                lineRenderer.positionCount = 0;
-            }
-            else if (!fromPlayer)
-            {
-                isDrawing = false;
-                finished = false;
-                return;
-            }
-
-            isDrawing = true;
-            finished = false;
-
+            ResetPath();
+            TryGetMouseHitPoint(out Vector3 startPoint);
             startPoint = playerTransform.position + Vector3.up * 0.1f;
             pathPoints.Add(startPoint);
             lineRenderer.positionCount = pathPoints.Count;
             lineRenderer.SetPositions(pathPoints.ToArray());
+            isDrawing = true;
         }
 
         if (isDrawing && Input.GetMouseButton(0))
@@ -77,25 +47,17 @@ public class PathDrawer : MonoBehaviour
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100f, groundMask))
             {
                 Vector3 point = hit.point + Vector3.up * 0.1f;
-
-                if (pathPoints.Count == 0 || Vector3.Distance(pathPoints[^1], point) > pointSpacing)
+                if (Vector3.Distance(pathPoints[^1], point) > pointSpacing)
                 {
                     pathPoints.Add(point);
                     lineRenderer.positionCount = pathPoints.Count;
                     lineRenderer.SetPositions(pathPoints.ToArray());
 
-                    Vector2 pointXZ = new Vector2(point.x, point.z);
-                    Vector2 goalXZ = new Vector2(goalCollider.bounds.center.x, goalCollider.bounds.center.z);
-
-                    float distanceToGoal = Vector2.Distance(pointXZ, goalXZ);
-
-                    // ÉSÅ[ÉãÇÃXZï˚å¸ÇÃîºåaÅiBoxColliderëzíËÅj
-                    float stopThreshold = Mathf.Min(goalCollider.bounds.extents.x, goalCollider.bounds.extents.z) * 0.3f;
-
-                    if (distanceToGoal < stopThreshold)
+                    // ‚òÖ „Ç¥„Éº„É´Âà§ÂÆö
+                    if (IsPointInGoal(point))
                     {
-                        Debug.Log("ÉSÅ[ÉãÉGÉäÉAì‡Ç…è≠Çµì¸Ç¡ÇΩÉ^ÉCÉ~ÉìÉOÇ≈í‚é~ÅI");
-                        DisablePathDrawing();
+                        Debug.Log("‚úÖ „Ç¥„Éº„É´„Ç®„É™„Ç¢„Å´Âà∞ÈÅî„Åó„Åü„ÅÆ„ÅßÊèèÁîªÂÅúÊ≠¢ÔºÅ");
+                        StopDrawing();
                         return;
                     }
                 }
@@ -106,47 +68,78 @@ public class PathDrawer : MonoBehaviour
         {
             if (isDrawing)
             {
-                isDrawing = false;
-                finished = true;
-
-                playerTransform.position = initialPlayerPosition;
-                playerTransform.rotation = initialPlayerRotation;
-            }
-            else
-            {
-                finished = false;
+                StopDrawing();
             }
         }
+    }
+
+    private void StopDrawing()
+    {
+        isDrawing = false;
+        finished = true;
+
+        // „Çπ„É†„Éº„Ç∫Âåñ
+        smoothedPoints = SmoothPath(pathPoints, 0.5f);
+
+        // Á∑öÊõ¥Êñ∞
+        lineRenderer.positionCount = smoothedPoints.Count;
+        lineRenderer.SetPositions(smoothedPoints.ToArray());
+    }
+
+    private void ResetPath()
+    {
+        pathPoints.Clear();
+        smoothedPoints.Clear();
+        lineRenderer.positionCount = 0;
+        playerTransform.position = initialPlayerPosition;
+        playerTransform.rotation = initialPlayerRotation;
+        isDrawing = false;
+        finished = false;
+    }
+
+    private List<Vector3> SmoothPath(List<Vector3> points, float smoothingFactor)
+    {
+        List<Vector3> result = new List<Vector3>(points);
+        for (int i = 1; i < result.Count - 1; i++)
+        {
+            result[i] = Vector3.Lerp(result[i], (result[i - 1] + result[i + 1]) / 2f, smoothingFactor);
+        }
+        return result;
     }
 
     private bool TryGetMouseHitPoint(out Vector3 point)
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundMask))
         {
             point = hit.point + Vector3.up * 0.1f;
             return true;
         }
-
         point = Vector3.zero;
         return false;
     }
 
+    private bool IsPointInGoal(Vector3 point)
+    {
+        Vector3 goalCenter = goalCollider.bounds.center;
+        Vector3 goalExtents = goalCollider.bounds.extents;
+
+        // x-z Âπ≥Èù¢„ÅÆ„ÅøÊØîËºÉ
+        Vector2 pointXZ = new Vector2(point.x, point.z);
+        Vector2 goalCenterXZ = new Vector2(goalCenter.x, goalCenter.z);
+        float goalRadius = Mathf.Min(goalExtents.x, goalExtents.z) * 0.2f;
+
+        return Vector2.Distance(pointXZ, goalCenterXZ) < goalRadius;
+    }
+
     public List<Vector3> GetPathPoints()
     {
-        return new List<Vector3>(pathPoints);
+        return new List<Vector3>(smoothedPoints.Count > 0 ? smoothedPoints : pathPoints);
     }
 
-    public bool IsPathFinished()
-    {
-        return finished;
-    }
+    public bool IsPathFinished() => finished;
 
-    public void ResetPathState()
-    {
-        finished = false;
-    }
+    public void ResetPathState() => finished = false;
 
     public void DisablePathDrawing()
     {
