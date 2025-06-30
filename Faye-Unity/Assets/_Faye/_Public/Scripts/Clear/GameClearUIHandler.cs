@@ -3,8 +3,10 @@ using System.Collections;
 
 public class GameClearUIHandler : MonoBehaviour
 {
-    public GameObject clearUI; // ← Inspector でセット
-    private StageManager stageManager;
+    public GameObject     clearUI;
+    public ParticleSystem crackerEffect;
+
+    private StageManager  stageManager;
 
     private void Awake()
     {
@@ -14,6 +16,11 @@ public class GameClearUIHandler : MonoBehaviour
         {
             clearUI.SetActive(false);
         }
+
+        if (crackerEffect != null)
+        {
+            crackerEffect.Stop();
+        }
     }
 
     public void HideUIImmediately()
@@ -21,6 +28,11 @@ public class GameClearUIHandler : MonoBehaviour
         if (clearUI != null)
         {
             clearUI.SetActive(false);
+        }
+        
+        if (crackerEffect != null)
+        {
+            crackerEffect.Stop();
         }
     }
 
@@ -31,19 +43,20 @@ public class GameClearUIHandler : MonoBehaviour
 
     private IEnumerator ClearSequenceCoroutine()
     {
-        // ゴール色変更後に1秒待つ
         yield return new WaitForSeconds(1f);
 
-        // クリアUIを表示
         if (clearUI != null)
         {
             clearUI.SetActive(true);
         }
 
-        // さらに2秒待つ
-        yield return new WaitForSeconds(2f);
+        if (crackerEffect != null)
+        {
+            crackerEffect.Play();
+        }
 
-        // ステージ切り替え
+        yield return new WaitForSeconds(4f);
+
         if (stageManager != null)
         {
             stageManager.OnPlayerReachGoal();
