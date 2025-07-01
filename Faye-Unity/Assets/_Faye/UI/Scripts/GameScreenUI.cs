@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class GameScreenUI : MonoBehaviour
 {
-    public GameObject uiRoot; // UI全体まとめた親オブジェクト
+    public GameObject uiRoot;
     public TMP_Text   scoreText;
     public Image[]    keyIcons;
     public Color      keyActiveColor = Color.yellow;

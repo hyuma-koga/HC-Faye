@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
 
@@ -6,6 +6,7 @@ public class StageManager : MonoBehaviour
 {
     public List<GameObject> stagePrefabs;
     public TMP_Text         stageNumberText;
+
     private GameObject      currentStage;
     private int             currentStageIndex = 0;
 
@@ -28,7 +29,6 @@ public class StageManager : MonoBehaviour
         }
     }
 
-    // ƒS[ƒ‹‚É“’B‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚é
     public void OnPlayerReachGoal()
     {
         currentStageIndex++;
